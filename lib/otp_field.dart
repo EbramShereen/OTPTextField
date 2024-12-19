@@ -221,9 +221,7 @@ class _OTPTextFieldState extends State<OTPTextField> {
               ? widget.hints![index]
               : "0",
           hintStyle: TextStyle(color: Colors.grey),
-          errorText: index == 0
-              ? _errorText
-              : null, // Show error message on the first field only
+          errorText: _errorText!.isNotEmpty ? _errorText : null,
           errorStyle: const TextStyle(color: Colors.red),
         ),
         onChanged: (String str) {
@@ -256,6 +254,7 @@ class _OTPTextFieldState extends State<OTPTextField> {
           }
 
           widget.onChanged!(currentPin);
+          _validateOTP();
         },
       ),
     );

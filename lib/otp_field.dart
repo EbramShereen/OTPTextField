@@ -62,6 +62,9 @@ class OTPTextField extends StatefulWidget {
 
   final List<TextInputFormatter>? inputFormatter;
 
+  // to add hint messages to otp fields
+  final List<String>? hints;
+
   const OTPTextField({
     Key? key,
     this.length = 4,
@@ -73,7 +76,7 @@ class OTPTextField extends StatefulWidget {
     this.hasError = false,
     this.keyboardType = TextInputType.number,
     this.style = const TextStyle(),
-    this.outlineBorderRadius: 10,
+    this.outlineBorderRadius = 10,
     this.textCapitalization = TextCapitalization.none,
     this.textFieldAlignment = MainAxisAlignment.spaceBetween,
     this.obscureText = false,
@@ -84,6 +87,7 @@ class OTPTextField extends StatefulWidget {
         const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
     this.isDense = false,
     this.onCompleted,
+    this.hints,
   })  : assert(length > 1),
         super(key: key);
 
@@ -201,8 +205,11 @@ class _OTPTextFieldState extends State<OTPTextField> {
           disabledBorder: _getBorder(_otpFieldStyle.disabledBorderColor),
           errorBorder: _getBorder(_otpFieldStyle.errorBorderColor),
           focusedErrorBorder: _getBorder(_otpFieldStyle.errorBorderColor),
-          errorText: null,
-          // to hide the error text
+          hintText: widget.hints != null && index < widget.hints!.length
+              ? widget.hints![index]
+              : "0", // Default hint if no hints are provided.
+          hintStyle: TextStyle(color: Colors.grey), // Customize hint text style
+          errorText: null, // to hide the error text
           errorStyle: const TextStyle(height: 0, fontSize: 0),
         ),
         onChanged: (String str) {
@@ -211,37 +218,29 @@ class _OTPTextFieldState extends State<OTPTextField> {
             return;
           }
 
-          // Check if the current value at this position is empty
-          // If it is move focus to previous text field.
           if (str.isEmpty) {
             if (index == 0) return;
             _focusNodes[index]!.unfocus();
             _focusNodes[index - 1]!.requestFocus();
           }
 
-          // Update the current pin
           setState(() {
             _pin[index] = str;
           });
 
-          // Remove focus
           if (str.isNotEmpty) _focusNodes[index]!.unfocus();
-          // Set focus to the next field if available
           if (index + 1 != widget.length && str.isNotEmpty) {
             FocusScope.of(context).requestFocus(_focusNodes[index + 1]);
           }
 
           String currentPin = _getCurrentPin();
 
-          // if there are no null values that means otp is completed
-          // Call the `onCompleted` callback function provided
           if (!_pin.contains(null) &&
               !_pin.contains('') &&
               currentPin.length == widget.length) {
             widget.onCompleted?.call(currentPin);
           }
 
-          // Call the `onChanged` callback function
           widget.onChanged!(currentPin);
         },
       ),

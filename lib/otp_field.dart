@@ -307,6 +307,7 @@ class _OTPTextFieldState extends State<OTPTextField> {
 
     // Call the `onChanged` callback function
     widget.onChanged!(currentPin);
+    _validateOTP();
   }
 }
 

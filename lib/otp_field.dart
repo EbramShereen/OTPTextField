@@ -65,6 +65,9 @@ class OTPTextField extends StatefulWidget {
   // to add hint messages to otp fields
   final List<String>? hints;
 
+  /// Form Field Validator
+  final FormFieldValidator<String>? validator;
+
   const OTPTextField({
     Key? key,
     this.length = 4,
@@ -88,6 +91,7 @@ class OTPTextField extends StatefulWidget {
     this.isDense = false,
     this.onCompleted,
     this.hints,
+    this.validator,
   })  : assert(length > 1),
         super(key: key);
 
@@ -101,6 +105,7 @@ class _OTPTextFieldState extends State<OTPTextField> {
   late List<TextEditingController?> _textControllers;
 
   late List<String> _pin;
+  String? _errorText;
 
   @override
   void initState() {
@@ -129,6 +134,14 @@ class _OTPTextFieldState extends State<OTPTextField> {
   void dispose() {
     _textControllers.forEach((controller) => controller?.dispose());
     super.dispose();
+  }
+
+  void _validateOTP() {
+    if (widget.validator != null) {
+      setState(() {
+        _errorText = widget.validator!(_getCurrentPin());
+      });
+    }
   }
 
   @override
@@ -202,15 +215,16 @@ class _OTPTextFieldState extends State<OTPTextField> {
           border: _getBorder(_otpFieldStyle.borderColor),
           focusedBorder: _getBorder(_otpFieldStyle.focusBorderColor),
           enabledBorder: _getBorder(_otpFieldStyle.enabledBorderColor),
-          disabledBorder: _getBorder(_otpFieldStyle.disabledBorderColor),
           errorBorder: _getBorder(_otpFieldStyle.errorBorderColor),
           focusedErrorBorder: _getBorder(_otpFieldStyle.errorBorderColor),
           hintText: widget.hints != null && index < widget.hints!.length
               ? widget.hints![index]
-              : "0", // Default hint if no hints are provided.
-          hintStyle: TextStyle(color: Colors.grey), // Customize hint text style
-          errorText: null, // to hide the error text
-          errorStyle: const TextStyle(height: 0, fontSize: 0),
+              : "0",
+          hintStyle: TextStyle(color: Colors.grey),
+          errorText: index == 0
+              ? _errorText
+              : null, // Show error message on the first field only
+          errorStyle: const TextStyle(color: Colors.red),
         ),
         onChanged: (String str) {
           if (str.length > 1) {
@@ -288,6 +302,7 @@ class _OTPTextFieldState extends State<OTPTextField> {
         !_pin.contains('') &&
         currentPin.length == widget.length) {
       widget.onCompleted?.call(currentPin);
+      _validateOTP(); // Validate the OTP
     }
 
     // Call the `onChanged` callback function

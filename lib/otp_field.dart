@@ -142,22 +142,41 @@ class _OTPTextFieldState extends State<OTPTextField> {
         String currentPin = _getCurrentPin();
         _errorText = currentPin.length == widget.length
             ? widget.validator!(currentPin)
-            : null; // Validate only if all fields are filled
+            : null; // Show error only if all fields are filled and invalid
       });
     }
   }
 
+  void _clearErrors() {
+    setState(() {
+      _errorText = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: widget.width,
-      child: Row(
-        mainAxisAlignment: widget.textFieldAlignment,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: List.generate(widget.length, (index) {
-          return buildTextField(context, index);
-        }),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: widget.width,
+          child: Row(
+            mainAxisAlignment: widget.textFieldAlignment,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: List.generate(widget.length, (index) {
+              return buildTextField(context, index);
+            }),
+          ),
+        ),
+        if (_errorText != null && _errorText!.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              _errorText!,
+              style: const TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          ),
+      ],
     );
   }
 
@@ -242,6 +261,7 @@ class _OTPTextFieldState extends State<OTPTextField> {
 
           setState(() {
             _pin[index] = str;
+            _clearErrors(); // Clear errors when input changes
           });
 
           if (str.isNotEmpty) _focusNodes[index]!.unfocus();

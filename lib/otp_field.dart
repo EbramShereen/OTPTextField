@@ -139,7 +139,10 @@ class _OTPTextFieldState extends State<OTPTextField> {
   void _validateOTP() {
     if (widget.validator != null) {
       setState(() {
-        _errorText = widget.validator!(_getCurrentPin());
+        String currentPin = _getCurrentPin();
+        _errorText = currentPin.length == widget.length
+            ? widget.validator!(currentPin)
+            : null; // Validate only if all fields are filled
       });
     }
   }
@@ -248,14 +251,12 @@ class _OTPTextFieldState extends State<OTPTextField> {
 
           String currentPin = _getCurrentPin();
 
-          if (!_pin.contains(null) &&
-              !_pin.contains('') &&
-              currentPin.length == widget.length) {
+          if (currentPin.length == widget.length) {
             widget.onCompleted?.call(currentPin);
+            _validateOTP(); // Validate the OTP here
           }
 
           widget.onChanged!(currentPin);
-          _validateOTP();
         },
       ),
     );

@@ -153,28 +153,39 @@ class _OTPTextFieldState extends State<OTPTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: widget.width,
-          child: Row(
-            mainAxisAlignment: widget.textFieldAlignment,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: List.generate(widget.length, (index) {
-              return buildTextField(context, index);
-            }),
-          ),
-        ),
-        if (_errorText != null && _errorText!.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0),
-            child: Text(
-              _errorText!,
-              style: const TextStyle(color: Colors.red, fontSize: 12),
+    return FormField<String>(
+      validator: (_) {
+        if (widget.validator != null) {
+          String currentPin = _getCurrentPin();
+          return widget.validator!(currentPin);
+        }
+        return null;
+      },
+      builder: (formFieldState) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: widget.width,
+              child: Row(
+                mainAxisAlignment: widget.textFieldAlignment,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: List.generate(widget.length, (index) {
+                  return buildTextField(context, index);
+                }),
+              ),
             ),
-          ),
-      ],
+            if (formFieldState.errorText != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  formFieldState.errorText!,
+                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 
@@ -324,6 +335,20 @@ class _OTPTextFieldState extends State<OTPTextField> {
 
 class OtpFieldController {
   late _OTPTextFieldState _otpTextFieldState;
+
+  bool validate() {
+    if (_otpTextFieldState.widget.validator != null) {
+      String currentPin = _otpTextFieldState._getCurrentPin();
+      String? error = _otpTextFieldState.widget.validator!(currentPin);
+
+      _otpTextFieldState.setState(() {
+        _otpTextFieldState._errorText = error;
+      });
+
+      return error == null; // Return true if no error
+    }
+    return true; // No validator, assume valid
+  }
 
   void setOtpTextFieldState(_OTPTextFieldState state) {
     _otpTextFieldState = state;

@@ -243,9 +243,6 @@ class _OTPTextFieldState extends State<OTPTextField> {
               ? widget.hints![index]
               : "0",
           hintStyle: TextStyle(color: Colors.grey),
-          errorText:
-              _errorText != null && _errorText!.isNotEmpty ? _errorText : null,
-          errorStyle: const TextStyle(color: Colors.red),
         ),
         onChanged: (String str) {
           if (str.length > 1) {

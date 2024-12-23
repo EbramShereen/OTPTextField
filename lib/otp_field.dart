@@ -140,9 +140,7 @@ class _OTPTextFieldState extends State<OTPTextField> {
     if (widget.validator != null) {
       setState(() {
         String currentPin = _getCurrentPin();
-        _errorText = currentPin.length == widget.length
-            ? widget.validator!(currentPin)
-            : null; // Show error only if all fields are filled and invalid
+        _errorText = widget.validator!(currentPin);
       });
     }
   }
@@ -258,7 +256,7 @@ class _OTPTextFieldState extends State<OTPTextField> {
 
           setState(() {
             _pin[index] = str;
-            _clearErrors(); // Clear errors when input changes
+            _validateOTP(); // Trigger validation on each character input
           });
 
           if (str.isNotEmpty) _focusNodes[index]!.unfocus();
@@ -267,11 +265,6 @@ class _OTPTextFieldState extends State<OTPTextField> {
           }
 
           String currentPin = _getCurrentPin();
-
-          if (currentPin.length == widget.length) {
-            widget.onCompleted?.call(currentPin);
-            _validateOTP(); // Validate the OTP here
-          }
 
           widget.onChanged!(currentPin);
         },
